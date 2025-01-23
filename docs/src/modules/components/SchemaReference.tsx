@@ -1,20 +1,18 @@
 import * as React from 'react';
-import MarkdownElement from '@mui/monorepo/docs/src/modules/components/MarkdownElement';
+import { useTranslate } from '@mui/docs/i18n';
+import { MarkdownElement } from '@mui/docs/MarkdownElement';
 import AppLayoutDocs from '@mui/monorepo/docs/src/modules/components/AppLayoutDocs';
 import Ad from '@mui/monorepo/docs/src/modules/components/Ad';
 import type { JSONSchema7, JSONSchema7Definition } from 'json-schema';
 import KeyboardArrowRightRoundedIcon from '@mui/icons-material/KeyboardArrowRightRounded';
-import {
-  ButtonBase,
-  Collapse,
-  Tooltip,
-  TooltipProps,
-  Typography,
-  styled,
-  tooltipClasses,
-} from '@mui/material';
+import ButtonBase from '@mui/material/ButtonBase';
+import Collapse from '@mui/material/Collapse';
+import Tooltip, { tooltipClasses, TooltipProps } from '@mui/material/Tooltip';
+import Typography from '@mui/material/Typography';
+import { styled } from '@mui/material/styles';
 import invariant from 'invariant';
 import clsx from 'clsx';
+import { SectionTitle } from '@mui/docs/SectionTitle';
 import { interleave } from '../utils/react';
 
 const EMPTY_OBJECT = {};
@@ -157,6 +155,8 @@ interface JsonSchemaTypeDisplayProps {
 }
 
 function JsonSchemaTypeDisplay({ schema, open, onOpenChange }: JsonSchemaTypeDisplayProps) {
+  const t = useTranslate();
+
   let types: string[] = [];
   if (typeof schema.const !== 'undefined') {
     return (
@@ -185,19 +185,19 @@ function JsonSchemaTypeDisplay({ schema, open, onOpenChange }: JsonSchemaTypeDis
   if (schema.type === 'object') {
     return (
       <CollapsibleLabel open={open} onOpenChange={onOpenChange}>
-        object
+        {t('object').toLowerCase()}
       </CollapsibleLabel>
     );
   }
 
   if (schema.type === 'array') {
-    return <span className={classNames.objectLabel}>array of </span>;
+    return <span className={classNames.objectLabel}>{t('arrayOf').toLowerCase()} </span>;
   }
 
   if (schema.anyOf) {
     return (
       <CollapsibleLabel open={open} onOpenChange={onOpenChange}>
-        any of{' '}
+        {t('anyOf').toLowerCase()}{' '}
       </CollapsibleLabel>
     );
   }
@@ -448,16 +448,7 @@ interface HeadingProps {
 }
 
 function Heading({ hash, level: Level, title }: HeadingProps) {
-  return (
-    <Level id={hash}>
-      {title}
-      <a aria-labelledby={hash} className="anchor-link" href={`#${hash}`} tabIndex={-1}>
-        <svg>
-          <use xlinkHref="#anchor-link-icon" />
-        </svg>
-      </a>
-    </Level>
-  );
+  return <SectionTitle title={title} id={hash} level={Level} />;
 }
 
 interface JsonSchemaDisplayProps {
@@ -479,10 +470,12 @@ function JsonSchemaDisplay({ name, hash, schema, idPrefix = '' }: JsonSchemaDisp
   );
 }
 
-const description = 'An exhaustive reference for the Toolpad file formats.';
+const description = 'An exhaustive reference for the Toolpad Studio file formats.';
 
 export default function SchemaReference(props: SchemaReferenceProps) {
   const { definitions, disableAd, location } = props;
+  const t = useTranslate();
+
   const toc = [
     {
       text: 'Files',
@@ -498,7 +491,7 @@ export default function SchemaReference(props: SchemaReferenceProps) {
     {
       text: 'Definitions',
       hash: 'definitions',
-      introduction: `These are shared definitions used throughout Toolpad files.`,
+      introduction: `These are shared definitions used throughout Toolpad Studio files.`,
       children: Object.entries(definitions.definitions || {}).map(([name, content]) => ({
         text: name,
         hash: `definition-${name}`,
@@ -514,12 +507,12 @@ export default function SchemaReference(props: SchemaReferenceProps) {
       disableAd={disableAd}
       disableToc={false}
       location={location}
-      title="Schema reference"
+      title={t('schemaReference')}
       toc={toc}
     >
       <SchemaContext.Provider value={definitions.definitions || EMPTY_OBJECT}>
         <MarkdownElement>
-          <h1>Schema reference</h1>
+          <h1>{t('schemaReference')}</h1>
           <Typography
             variant="h5"
             component="p"

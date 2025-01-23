@@ -10,7 +10,7 @@ export function interleave(items: React.ReactNode[], separator: React.ReactNode)
   for (let i = 0; i < items.length; i += 1) {
     if (i > 0) {
       if (ReactIs.isElement(separator)) {
-        result.push(React.cloneElement(separator, { key: `separator-${i}` }));
+        result.push(React.cloneElement(separator as React.ReactElement, { key: `separator-${i}` }));
       } else {
         result.push(separator);
       }
@@ -101,20 +101,16 @@ export function createGlobalState<T>(initialState: T) {
     };
   };
 
-  const getState = () => {
-    return state;
-  };
+  const getState = () => state;
 
   const setState = (newState: T | ((oldValue: T) => T)) => {
     state = typeof newState === 'function' ? (newState as Function)(state) : newState;
     listeners.forEach((cb) => cb(state));
   };
 
-  const useValue = () => {
-    return React.useSyncExternalStore(subscribe, getState);
-  };
+  const useValue = () => React.useSyncExternalStore(subscribe, getState, getState);
 
-  const useState = () => {
+  const useState = (): [T, React.Dispatch<React.SetStateAction<T>>] => {
     const value = useValue();
     return [value, setState];
   };

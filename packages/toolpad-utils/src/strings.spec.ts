@@ -6,6 +6,8 @@ import {
   pascalCase,
   camelCase,
   guessTitle,
+  kebabToConstant,
+  kebabToPascal,
 } from './strings';
 
 describe('findImports', () => {
@@ -92,6 +94,28 @@ describe('camelCase', () => {
     [[''], ''],
   ])('should convert %p to %p', (got, expected) => {
     expect(camelCase(...got)).toEqual(expected);
+  });
+});
+
+describe('kebabToConstant', () => {
+  test.each([
+    ['foo-bar', 'FOO_BAR'],
+    ['foo-bar-baz', 'FOO_BAR_BAZ'],
+    ['foo', 'FOO'],
+    ['foo-bar-baz-qux', 'FOO_BAR_BAZ_QUX'],
+  ])('should convert %p to %p', (got, expected) => {
+    expect(kebabToConstant(got)).toEqual(expected);
+  });
+});
+
+describe('kebabToPascalCase', () => {
+  test.each([
+    ['foo-bar', 'FooBar'],
+    ['foo-bar-baz', 'FooBarBaz'],
+    ['foo', 'Foo'],
+    ['foo-bar-baz-qux', 'FooBarBazQux'],
+  ])('should convert %p to %p', (got, expected) => {
+    expect(kebabToPascal(got)).toEqual(expected);
   });
 });
 
