@@ -1,10 +1,19 @@
 version: 2.1
+orbs:
+  codecov: codecov/codecov@4.2.0
 
-defaults: &defaults
-  working_directory: /tmp/mui-toolpad
+default-job: &default-job
+  working_directory: /tmp/toolpad
   resource_class: medium
   docker:
-    - image: cimg/node:18.17.1
+    - image: cimg/node:20.17
+  environment:
+    COREPACK_ENABLE_DOWNLOAD_PROMPT: '0'
+
+default-context: &default-context
+  context:
+    - org-global
+
 # CircleCI has disabled the cache across forks for security reasons.
 # Following their official statement, it was a quick solution, they
 # are working on providing this feature back with appropriate security measures.
@@ -20,32 +29,26 @@ commands:
       browsers:
         type: boolean
         default: false
-        description: 'Set to true if you intend to use any browser (e.g. with playwright).'
-
+        description: 'Set to true if you intend to use any browser (for example with playwright).'
     steps:
-      - restore_cache:
-          name: Restore pnpm Package Cache
-          keys:
-            - pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
-
+      - run:
+          name: Set npm registry public signing keys
+          command: |
+            echo "export COREPACK_INTEGRITY_KEYS='$(curl https://registry.npmjs.org/-/npm/v1/keys | jq -c '{npm: .keys}')'" >> $BASH_ENV
       - when:
           condition: << parameters.browsers >>
           steps:
             - run:
                 name: Install pnpm package manager
-                command: |
-                  corepack enable
-                  corepack prepare pnpm@latest-8 --activate
+                command: corepack enable
+      - when:
+          condition:
+            not: << parameters.browsers >>
+          steps:
             - run:
-                name: Prepare playwright hash
-                command: pnpm list --json --filter playwright > /tmp/playwright_info.json
-            - store_artifacts:
-                name: Debug playwright hash
-                path: /tmp/playwright_info.json
-            - restore_cache:
-                name: Restore playwright cache
-                keys:
-                  - v5-playwright-{{ arch }}-{{ checksum "/tmp/playwright_info.json" }}
+                name: Install pnpm package manager
+                # See https://stackoverflow.com/a/73411601
+                command: corepack enable --install-directory ~/bin
       - run:
           name: View install environment
           command: |
@@ -54,34 +57,10 @@ commands:
       - run:
           name: Install js dependencies
           command: pnpm install
-      - when:
-          condition: << parameters.browsers >>
-          steps:
-            - run:
-                name: Install playwright browsers
-                command: pnpm playwright install --with-deps
-                environment:
-                  PLAYWRIGHT_BROWSERS_PATH: /tmp/pw-browsers
-
-      - save_cache:
-          name: Save pnpm Package Cache
-          key: pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
-          paths:
-            - node_modules
-      - when:
-          condition: << parameters.browsers >>
-          steps:
-            - save_cache:
-                name: Save playwright cache
-                key: v5-playwright-{{ arch }}-{{ checksum "/tmp/playwright_info.json" }}
-                paths:
-                  # Keep path in sync with "PLAYWRIGHT_BROWSERS_PATH"
-                  # Can't use environment variables for `save_cache` paths (tested in https://app.circleci.com/pipelines/github/mui/material-ui/37813/workflows/5b1e207f-ac8b-44e7-9ba4-d0f9a01f5c55/jobs/223370)
-                  - /tmp/pw-browsers
 
 jobs:
   checkout:
-    <<: *defaults
+    <<: *default-job
     steps:
       - checkout
       - install_js
@@ -91,7 +70,8 @@ jobs:
       - run:
           name: Check for duplicated packages
           command: |
-            if [[ $(git diff --name-status master | grep pnpm.lock) == "" ]];
+            # #default-branch-switch
+            if [[ $(git diff --name-status master | grep -E 'pnpm-workspace\.yaml|pnpm-lock.yaml|package\.json') == "" ]];
             then
                 echo "no changes to dependencies detected, skipping..."
             else
@@ -99,7 +79,7 @@ jobs:
             fi
 
   test_lint:
-    <<: *defaults
+    <<: *default-job
     steps:
       - checkout
       - install_js
@@ -113,22 +93,34 @@ jobs:
           name: Lint Markdown
           command: pnpm markdownlint
   test_types:
-    <<: *defaults
+    <<: *default-job
     steps:
       - checkout
       - install_js
       - run:
           name: Check Typescript types
           command: pnpm check-types
+          environment:
+            NODE_OPTIONS: --max-old-space-size=3584
   test_static:
-    <<: *defaults
+    <<: *default-job
     steps:
       - checkout
       - install_js
       - run:
+          name: '`pnpm docs:typescript:formatted` changes committed?'
+          command: |
+            pnpm docs:typescript:formatted --disable-cache
+            pnpm check-changes
+      - run:
           name: '`pnpm prettier:all` changes committed?'
           command: |
             pnpm prettier:all
+            pnpm check-changes
+      - run:
+          name: '`pnpm proptypes` changes committed?'
+          command: |
+            pnpm proptypes
             pnpm check-changes
       - run:
           name: '`pnpm jsonSchemas` changes committed?'
@@ -142,8 +134,7 @@ jobs:
             pnpm check-changes
 
   test_unit:
-    <<: *defaults
-
+    <<: *default-job
     steps:
       - checkout
       - install_js:
@@ -151,20 +142,19 @@ jobs:
       - run:
           name: 'Build packages'
           command: pnpm release:build
+          environment:
+            NODE_OPTIONS: --max-old-space-size=3584
       - run:
           name: Tests fake browser
           command: pnpm test
+      - codecov/upload
 
-  test_integration:
-    <<: *defaults
-    resource_class: 'large'
-    parallelism: 2
+  test_unit_browser:
+    <<: *default-job
     docker:
-      - image: mcr.microsoft.com/playwright:v1.40.1-focal
+      - image: mcr.microsoft.com/playwright:v1.48.2-focal
         environment:
           NODE_ENV: test
-          TOOLPAD_TEST_RETRIES: 1
-
     steps:
       - checkout
       - install_js:
@@ -172,6 +162,30 @@ jobs:
       - run:
           name: 'Build packages'
           command: pnpm release:build
+          environment:
+            NODE_OPTIONS: --max-old-space-size=3584
+      - run:
+          name: Tests real browser
+          command: pnpm test:browser
+
+  test_integration:
+    <<: *default-job
+    resource_class: 'large'
+    parallelism: 2
+    docker:
+      - image: mcr.microsoft.com/playwright:v1.47.2-focal
+        environment:
+          NODE_ENV: test
+          TOOLPAD_TEST_RETRIES: 1
+    steps:
+      - checkout
+      - install_js:
+          browsers: true
+      - run:
+          name: 'Build packages'
+          command: pnpm release:build
+          environment:
+            NODE_OPTIONS: --max-old-space-size=3584
       - run:
           name: Tests real browser
           command: pnpm test:integration
@@ -184,22 +198,46 @@ jobs:
           path: test/test-results
           destination: playwright-test-results
 
+  test_bundle_size_monitor:
+    <<: *default-job
+    steps:
+      - checkout
+      - install_js
+      - run:
+          name: Run danger on PRs
+          command: pnpm danger ci --fail-on-errors
+      # TODO test bundle size, similar to https://github.com/mui/base-ui/issues/201
+
 workflows:
   pipeline:
     jobs:
-      - checkout
+      - checkout:
+          <<: *default-context
       - test_lint:
+          <<: *default-context
           requires:
             - checkout
       - test_types:
+          <<: *default-context
           requires:
             - checkout
       - test_static:
+          <<: *default-context
           requires:
             - checkout
       - test_unit:
+          <<: *default-context
+          requires:
+            - checkout
+      - test_unit_browser:
+          <<: *default-context
           requires:
             - checkout
       - test_integration:
+          <<: *default-context
+          requires:
+            - checkout
+      - test_bundle_size_monitor:
+          <<: *default-context
           requires:
             - checkout
