@@ -4,10 +4,19 @@ pnpm-lock.yaml
 /docs/export
 /docs/schemas
 /packages/**/dist
-/packages/toolpad-app/.next
-/packages/toolpad-app/public
+/packages/toolpad-studio/.next
+/packages/toolpad-studio/public
+
+build
+dist
 
 /examples/*/toolpad.yml
 
 /test/integration/*/fixture*/
 /test/visual/*/fixture*/
+
+.generated
+.github
+
+.coverage
+.tsup

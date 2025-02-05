@@ -6,7 +6,8 @@ const currentDirectory = url.fileURLToPath(new URL('.', import.meta.url));
 
 test.use({
   ignoreConsoleErrors: [
-    /Failed to load resource: the server responded with a status of 404 \(Not Found\)/,
+    [/Failed to load resource: the server responded with a status of 404 \(Not Found\)/],
+    { scope: 'test' },
   ],
 });
 
@@ -20,12 +21,13 @@ test.use({
 });
 
 test('can render in an iframe', async ({ page, baseURL }) => {
+  await page.goto('https://example.com');
   await page.evaluate(
     ([src]) => {
       const iframe = document.createElement('iframe');
       iframe.src = src;
       iframe.id = 'my-frame';
-      document.body.append(iframe);
+      document.body.replaceChildren(iframe);
     },
     [`${baseURL}/prod/pages/o57cdlq`],
   );

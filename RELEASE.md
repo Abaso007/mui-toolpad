@@ -3,7 +3,7 @@
 1. Generate a new version using:
 
    ```bash
-   yarn release:version
+   pnpm release:version
    ```
 
    This command will bump the version in every package of the project.
@@ -11,7 +11,7 @@
 1. Generate the changelog using:
 
    ```bash
-   yarn release:changelog
+   pnpm release:changelog --release master
    ```
 
    Running this command requires a [GitHub personal access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) with the `public_repo` scope.
@@ -29,19 +29,60 @@
    - Focus on new user facing features or changes
    - Be concise, link to relevant documentation for extra clarity
 
+   Use the following template to format the list of changes:
+
+   ```md
+   <!-- HEADER + HIGHLIGHTS -->
+
+   ### `@toolpad/core`
+
+   - Commit message (#pr-number) @author
+   - ...
+
+   ### `@toolpad/studio`
+
+   - Commit message (#pr-number) @author
+   - ...
+
+   ### Docs
+
+   - Commit message (#pr-number) @author
+   - ...
+
+   ### Core
+
+   - Commit message (#pr-number) @author
+   - ...
+
+   <!-- CONTRIBUTORS -->
+   ```
+
+   Strip the `[tag]` from the commit lines and order them in each section. Sections that don't have changes can be removed altogether. If necessary, improve, redact or correct commit messages.
+
 1. Prepend the changelog to [`CHANGELOG.md`](./CHANGELOG.md).
 
 1. Open a PR to the `master` branch with the proposed changes. Add the "release" label.
 
-1. Smoke test the release with the [CodeSandbox CI](https://ci.codesandbox.io/status/mui/mui-toolpad) package of the PR branch:
+1. Smoke test the release with the [CodeSandbox CI](https://ci.codesandbox.io/status/mui/toolpad) package of the PR branch:
 
-   1. Run
+   a. Run Toolpad Core
 
    ```bash
-   npx https://pkg.csb.dev/mui/mui-toolpad/commit/<build>/create-toolpad-app smoke
+   pnpm dlx https://pkg.csb.dev/mui/toolpad/commit/<build>/create-toolpad-app smoke --core-version https://pkg.csb.dev/mui/toolpad/commit/<build>/@toolpad/core
    cd smoke
-   yarn add https://pkg.csb.dev/mui/mui-toolpad/commit/<build>/@mui/toolpad -S
-   yarn && yarn dev
+   pnpm add https://pkg.csb.dev/mui/toolpad/commit/<build>/@toolpad/core -S
+   pnpm dedupe && pnpm dev
+   ```
+
+   And verify the app runs
+
+   b. Run Toolpad Studio
+
+   ```bash
+   pnpm dlx https://pkg.csb.dev/mui/toolpad/commit/<build>/create-toolpad-app --studio smoke
+   cd smoke
+   pnpm add https://pkg.csb.dev/mui/toolpad/commit/<build>/@toolpad/studio -S
+   pnpm dedupe && pnpm dev
    ```
 
    And verify the editor works
@@ -59,13 +100,13 @@
    1. Publish to `npm`
 
       ```bash
-      yarn release:publish
+      pnpm release:publish
       ```
 
       If you've created a prerelease, then instead use
 
       ```bash
-      yarn release:publish-canary
+      pnpm release:publish-canary
       ```
 
 1. Publish the documentation. The documentation must be updated on the `docs-latest` branch.
@@ -76,7 +117,7 @@
 
    You can follow the deployment process on the [Netlify Dashboard](https://app.netlify.com/sites/mui-toolpad-docs/deploys?filter=docs-latest). Once deployed, it will be accessible at https://mui-toolpad-docs.netlify.app/.
 
-1. [Create a new GitHub release](https://github.com/mui/mui-toolpad/releases/new).
+1. [Create a new GitHub release](https://github.com/mui/toolpad/releases/new).
 
    1. Use `<version number>` to **Choose a tag** (when you enter new version GH UI will pop a suggestion `Create new tag: *** on publish`)
    1. Use `<commit of merged PR>` as the **target**

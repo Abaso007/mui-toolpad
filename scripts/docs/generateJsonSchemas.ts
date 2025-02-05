@@ -2,7 +2,10 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 import * as z from 'zod';
-import { META } from '../../packages/toolpad-app/src/server/schema';
+// TODO: Enable this rule, make eslint recognize the import path
+// eslint-disable-next-line import/no-relative-packages
+import { META } from '../../packages/toolpad-studio/src/server/schema';
+import { writePrettifiedFile } from './utils';
 
 const currentDirectory = __dirname;
 const SCHEMA_DIR = path.resolve(currentDirectory, '../../docs/schemas/v1/');
@@ -14,7 +17,8 @@ async function main() {
   const jsonSchema = zodToJsonSchema(z.object(META.schemas), {
     definitions: META.definitions,
   });
-  await fs.writeFile(schemaFile, JSON.stringify(jsonSchema, null, 2));
+  const jsonContent = JSON.stringify(jsonSchema);
+  await writePrettifiedFile(schemaFile, jsonContent);
 }
 
 main().catch((err) => {

@@ -35,6 +35,26 @@ export function camelCase(...parts: string[]): string {
 }
 
 /**
+ * Turns a kebab-case string into a constant case string.
+ */
+export function kebabToConstant(input: string): string {
+  return input
+    .split('-')
+    .map((part) => part.toUpperCase())
+    .join('_');
+}
+
+/**
+ * Turns a kebab-case string into a PascalCase string.
+ */
+export function kebabToPascal(input: string): string {
+  return input
+    .split('-')
+    .map((part) => capitalize(part))
+    .join('');
+}
+
+/**
  * Generates a string for `base` by add a number until it's unique amongst a set of predefined names.
  */
 export function generateUniqueString(base: string, existingNames: Set<string>) {

@@ -1,61 +1,74 @@
 <!-- markdownlint-disable-next-line -->
 <p align="center">
-  <a href="https://mui.com/" rel="noopener" target="_blank"><img width="150" src="https://mui.com/static/logo.svg" alt="MUI logo"></a>
+  <a href="https://mui.com/toolpad/" rel="noopener" target="_blank"><img width="150" src="https://mui.com/static/branding/product-toolpad-light.svg" alt="Toolpad logo"></a>
 </p>
 
-<h1 align="center">MUI Toolpad</h1>
+<h1 align="center">Toolpad</h1>
 
 <div align="center">
 
-Quickly build internal tools. MUI Toolpad is a self-hosted low-code internal tools builder designed to extend the [MUI](https://mui.com/) React components. It's designed for developers of all trades who want to save time building internal applications.
-
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/mui/material-ui/blob/HEAD/LICENSE)
-
-<!--
-[![npm latest package](https://img.shields.io/npm/v/@mui/toolpad/latest.svg)](https://www.npmjs.com/package/@mui/toolpad)
-[![npm next package](https://img.shields.io/npm/v/@mui/toolpad/next.svg)](https://www.npmjs.com/package/@mui/toolpad@beta)
-[![npm downloads](https://img.shields.io/npm/dm/@mui/toolpad.svg)](https://www.npmjs.com/package/@mui/toolpad)
--->
-
-[![CircleCI](https://circleci.com/gh/mui/mui-toolpad/tree/master.svg?style=shield)](https://app.circleci.com/pipelines/github/mui/mui-toolpad?branch=master)
-[![Follow on Twitter](https://img.shields.io/twitter/follow/MUI_hq.svg?label=follow+MUI)](https://twitter.com/MUI_hq)
-[![Renovate status](https://img.shields.io/badge/renovate-enabled-brightgreen.svg)](https://github.com/mui/mui-toolpad/issues/8)
-[![Average time to resolve an issue](http://isitmaintained.com/badge/resolution/mui/mui-toolpad.svg)](http://isitmaintained.com/project/mui/mui-toolpad 'Average time to resolve an issue')
+[![npm latest package](https://img.shields.io/npm/v/@toolpad/core/latest.svg)](https://www.npmjs.com/package/@toolpad/core)
+[![npm downloads](https://img.shields.io/npm/dm/@toolpad/core.svg)](https://www.npmjs.com/package/@toolpad/core)
+[![GitHub branch status](https://img.shields.io/github/checks-status/mui/toolpad/HEAD)](https://github.com/mui/toolpad/commits/HEAD/)
+[![Follow on X](https://img.shields.io/twitter/follow/Toolpad_.svg?label=follow+Toolpad)](https://x.com/Toolpad_)
+[![Renovate status](https://img.shields.io/badge/renovate-enabled-brightgreen.svg)](https://github.com/mui/toolpad/issues/8)
+[![Average time to resolve an issue](https://isitmaintained.com/badge/resolution/mui/toolpad.svg)](https://isitmaintained.com/project/mui/toolpad 'Average time to resolve an issue')
 [![Open Collective backers and sponsors](https://img.shields.io/opencollective/all/mui-org)](https://opencollective.com/mui-org)
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/6294/badge)](https://www.bestpractices.dev/projects/6294)
 
 </div>
 
-## We are making some changes
-
-A [big change](https://github.com/mui/mui-toolpad/discussions/1748) is coming: we're making Toolpad focus much more on integrating with your IDE while providing the ease of building UI fast with a drag and drop.
-
 ## Product walkthrough
 
-https://github.com/mui/mui-toolpad/assets/92228082/03d3da62-a8a7-4d2d-a07e-975744af9683
+- [Toolpad Core](https://mui.com/toolpad/core/introduction/) is a set of high level React components that abstract common concepts such as layout navigation and routing. It aims at helping you build and maintain dashboards and internal tooling faster. It's built on top of [Material UI](http://github.com/mui/material-ui/).
+
+https://github.com/user-attachments/assets/d2a7ff8e-2dd6-4313-98d2-5f136513f9a9/
+
+- [Toolpad Studio](https://mui.com/toolpad/studio/getting-started/) is a self-hosted low-code admin builder designed to extend the Toolpad Core React components. It's for developers of all trades who want to save time building internal applications. Drag and drop from a catalog of pre-built components, connect to any data source and build apps quickly.
+
+https://github.com/user-attachments/assets/f47466df-3790-4a05-8f38-f1aaa13a49f3/
 
 ## Notice
 
-MUI Toolpad is in its beta stages of development. Feel free to run this application to try it out for your use cases, and share any feedback, bug reports or feature requests that you come across.
+Toolpad is in its beta stages of development. Feel free to run this application to try it out for your use cases, and share any feedback, bug reports or feature requests that you come across.
 
 ## Quick setup locally
 
-Run:
+Toolpad Core:
 
 ```bash
-npx create-toolpad-app@latest my-toolpad-app
+npx create-toolpad-app@latest
 # or
-yarn create toolpad-app my-toolpad-app
+pnpm create toolpad-app
 # or
-pnpm create toolpad-app my-toolpad-app
+yarn create toolpad-app
+```
+
+Toolpad Studio:
+
+```bash
+npx create-toolpad-app@latest --studio my-toolpad-studio-app
+# or
+yarn create toolpad-app --studio my-toolpad-studio-app
+# or
+pnpm create toolpad-app --studio my-toolpad-studio-app
 ```
 
 ## Documentation
 
-Check out our [documentation](https://mui.com/toolpad/getting-started/).
+Check out our [documentation](https://mui.com/toolpad/studio/getting-started/).
 
 ## Examples
 
-Check out our [mui-public](https://github.com/mui/mui-public) repo to see how a Toolpad app looks in production.
+### Core
+
+Find a [list of example apps](https://mui.com/toolpad/core/introduction/examples/) on the docs to help you get started with Toolpad Core quickly.
+
+### Studio
+
+Check out our [mui-public](https://tools-public.mui.com/prod/pages/OverviewPage) app to see how a Toolpad Studio app looks in production.
+Our documentation contains more [examples](https://mui.com/toolpad/studio/examples/) to help you get started.
 
 ## Contributing
 
@@ -66,11 +79,11 @@ Although we love giving you the opportunity to put your stamp on MUI, we also ar
 
 ## Changelog
 
-The [changelog](https://github.com/mui/mui-toolpad/releases) is regularly updated to reflect what's changed in each new release.
+The [changelog](https://github.com/mui/toolpad/releases) is regularly updated to reflect what's changed in each new release.
 
 ## Roadmap
 
-Future plans and high-priority features and enhancements can be found in our [roadmap](https://mui.com/toolpad/getting-started/roadmap/).
+Future plans and high-priority features and enhancements can be found in the [roadmap](https://mui.com/toolpad/studio/getting-started/roadmap/).
 
 ## License
 
@@ -88,7 +101,11 @@ GitHub allows us to host the Git repository and coordinate contributions.
 
 Netlify allows us to distribute the documentation.
 
-[<img loading="lazy" alt="BrowserStack" src="https://www.browserstack.com/images/mail/browserstack-logo-footer.png" height="30">](https://www.browserstack.com/)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://mui.com/static/readme/browserstack-darkmode.svg">
+  <source media="(prefers-color-scheme: light)" srcset="https://mui.com/static/readme/browserstack-lightmode.svg">
+  <img alt="BrowserStack logo" src="https://mui.com/static/readme/browserstack-lightmode.svg" width="140" height="25">
+</picture>
 
 BrowserStack allows us to test in real browsers.
 

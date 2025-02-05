@@ -1,64 +1,36 @@
 import * as React from 'react';
-import NoSsr from '@mui/material/NoSsr';
 import Head from 'docs/src/modules/components/Head';
-import CssBaseline from '@mui/material/CssBaseline';
-import Divider from '@mui/material/Divider';
 import BrandingCssVarsProvider from 'docs/src/BrandingCssVarsProvider';
+import Divider from '@mui/material/Divider';
+import CssBaseline from '@mui/material/CssBaseline';
 import AppHeader from 'docs/src/layouts/AppHeader';
 import AppFooter from 'docs/src/layouts/AppFooter';
 import AppHeaderBanner from 'docs/src/components/banner/AppHeaderBanner';
+import Examples from '../../src/components/landing/Examples';
 import Hero from '../../src/components/landing/Hero';
-import HeroVideo from '../../src/components/landing/HeroVideo';
-import SignUpToast from '../../src/components/landing/SignUpToast';
-import UseCases from '../../src/components/landing/UseCases';
-import CardGrid from '../../src/components/landing/CardGrid';
-import Pricing from '../../src/components/landing/PricingTable';
-import Marquee from '../../src/components/landing/Marquee';
-import features from '../../data/toolpad/landing/features';
-import useCases from '../../data/toolpad/landing/useCases';
-import marquee from '../../data/toolpad/landing/marquee';
-import {
-  Headline,
-  plans,
-  planInfo,
-  rowHeaders,
-  communityData,
-  commercialData,
-} from '../../data/toolpad/landing/pricing';
+import Features from '../../src/components/landing/Features';
+import BuiltWith from '../../src/components/landing/BuiltWith';
+import StudioIntro from '../../src/components/landing/StudioIntro';
 
 export default function Home() {
   return (
     <BrandingCssVarsProvider>
       <Head
-        title="MUI Toolpad: Low-code admin builder"
-        description="Build apps with Material UI components, connect to data sources, APIs and build your internal tools 10x faster. Open-source and powered by MUI."
-        card="/static/toolpad/marketing/toolpad-og.jpg"
+        title="Toolpad Core: React components for dashboards"
+        description="Toolpad Core offers the components needed for your next admin panel and internal tools project."
+        card="/static/toolpad/marketing/toolpad-core-og.jpg"
       />
-      <NoSsr>
-        <SignUpToast />
-      </NoSsr>
       <CssBaseline />
       <AppHeaderBanner />
-      <AppHeader gitHubRepository="https://github.com/mui/mui-toolpad" />
+      <AppHeader gitHubRepository="https://github.com/mui/toolpad" />
       <main id="main-content">
         <Hero />
-        <HeroVideo />
+        <Features />
         <Divider />
-        <UseCases content={useCases} />
+        <BuiltWith />
         <Divider />
-        <CardGrid content={features} />
-        <Divider />
-        <Pricing
-          Headline={Headline}
-          plans={plans}
-          planInfo={planInfo}
-          rowHeaders={rowHeaders}
-          commercialData={commercialData}
-          communityData={communityData}
-        />
-        <Divider />
-        <Marquee content={marquee} />
-        <Divider />
+        <Examples />
+        <StudioIntro />
       </main>
       <AppFooter />
     </BrandingCssVarsProvider>

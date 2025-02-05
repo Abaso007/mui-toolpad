@@ -1,11 +1,42 @@
 const baseline = require('@mui/monorepo/.eslintrc');
-const lodash = require('lodash');
 const path = require('path');
+const lodash = require('lodash');
+
+const OneLevelImportMessage = [
+  'Prefer one level nested imports to avoid bundling everything in dev mode or breaking CJS/ESM split.',
+  'See https://github.com/mui/material-ui/pull/24147 for the kind of win it can unlock.',
+].join('\n');
 
 const ALLOWED_LODASH_METHODS = new Set(['throttle', 'debounce', 'set']);
 
+const noRestrictedImports = {
+  paths: [
+    {
+      name: '@mui/icons-material',
+      message: 'Use @mui/icons-material/<Icon> instead.',
+    },
+    {
+      name: 'lodash-es',
+      importNames: Object.keys(lodash).filter((key) => !ALLOWED_LODASH_METHODS.has(key)),
+      message:
+        'Avoid kitchensink libraries like lodash-es. We prefer a slightly more verbose, but more universally understood javascript style',
+    },
+    {
+      name: 'react-query',
+      message: 'deprecated package, use @tanstack/react-query instead.',
+    },
+  ],
+  patterns: [
+    {
+      group: ['lodash-es/*'],
+      message: 'Use `import { debounce } from "lodash-es";` instead.',
+    },
+  ],
+};
+
 module.exports = {
   ...baseline,
+  plugins: [...baseline.plugins, 'eslint-plugin-react-compiler', 'testing-library'],
   settings: {
     'import/resolver': {
       webpack: {
@@ -25,37 +56,11 @@ module.exports = {
    */
   rules: {
     ...baseline.rules,
-    'import/prefer-default-export': ['off'],
+    // TODO move to @mui/monorepo, codebase is moving away from default exports https://github.com/mui/material-ui/issues/21862
+    'import/prefer-default-export': 'off',
     // TODO move rule into the main repo once it has upgraded
-    '@typescript-eslint/return-await': ['off'],
-
-    'no-restricted-imports': [
-      'error',
-      {
-        paths: [
-          {
-            name: '@mui/icons-material',
-            message: 'Use @mui/icons-material/<Icon> instead.',
-          },
-          {
-            name: 'lodash-es',
-            importNames: Object.keys(lodash).filter((key) => !ALLOWED_LODASH_METHODS.has(key)),
-            message:
-              'Avoid kitchensink libraries like lodash-es. We prefer a slightly more verbose, but more universally understood javascript style',
-          },
-          {
-            name: 'react-query',
-            message: 'deprecated package, use @tanstack/react-query instead.',
-          },
-        ],
-        patterns: [
-          {
-            group: ['lodash-es/*'],
-            message: 'Use `import { debounce } from "lodash-es";` instead.',
-          },
-        ],
-      },
-    ],
+    '@typescript-eslint/return-await': 'off',
+    'no-restricted-imports': ['error', noRestrictedImports],
     'no-restricted-syntax': [
       ...baseline.rules['no-restricted-syntax'].filter((rule) => {
         // Too opinionated for Toolpad
@@ -66,7 +71,7 @@ module.exports = {
     // https://github.com/airbnb/javascript/blob/5155aa5fc1ea9bb2c6493a06ddbd5c7a05414c86/packages/eslint-config-airbnb/rules/react.js#L94
     'react/jsx-key': ['error', { checkKeyMustBeforeSpread: true, warnOnDuplicates: true }],
     // This got turned of in the mono-repo:
-    // See https://github.com/mui/mui-toolpad/pull/866#discussion_r957222171
+    // See https://github.com/mui/toolpad/pull/866#discussion_r957222171
     'react/no-unused-prop-types': [
       'error',
       {
@@ -78,7 +83,7 @@ module.exports = {
       'error',
       {
         // https://github.com/import-js/eslint-plugin-import/issues/1739
-        ignore: ['\\.md\\?@mui/markdown$'],
+        ignore: ['\\.md\\?muiMarkdown$'],
       },
     ],
     'import/no-restricted-paths': [
@@ -87,25 +92,40 @@ module.exports = {
         zones: [
           {
             // Don't leak the internal runtime abstraction. It's on its way to be moved towards a separate package
-            target: './packages/toolpad-app/src/runtime',
-            from: './packages/toolpad-app/src/',
-            except: [
-              './runtime',
-              // TODO: move ./src/appDom to ./src/runtime/appDom
-              './appDom',
-            ],
+            target: './packages/toolpad-studio/src/runtime',
+            from: './packages/toolpad-studio/src/',
+            except: ['./runtime'],
           },
         ],
       },
     ],
+    'material-ui/no-hardcoded-labels': 'off', // We are not really translating the docs/website anymore
+    'react-compiler/react-compiler': 'error',
   },
   overrides: [
+    ...baseline.overrides,
     {
+      files: ['**/*.test.js', '**/*.test.ts', '**/*.test.tsx'],
+      extends: ['plugin:testing-library/react'],
+    },
+    {
+      files: ['docs/src/modules/components/**/*.js'],
+      rules: {
+        'material-ui/no-hardcoded-labels': 'off',
+      },
+    },
+    {
+      /**
+       * TODO move to @mui/monorepo
+       *
+       * Examples are for demostration purposes and should not be considered as part of the library.
+       * They don't contain an eslint setup, so we don't want them to contain eslint directives
+       * We do however want to keep the rules in place to ensure the examples are following
+       * a reasonably similar code style as the library.
+       */
       files: ['examples/**/*'],
       rules: {
-        // We use it for demonstration purposes
         'no-console': 'off',
-        // Personal preference
         'no-underscore-dangle': 'off',
         // no node_modules in examples as they are not installed
         'import/no-unresolved': 'off',
@@ -114,13 +134,20 @@ module.exports = {
     {
       files: [
         'packages/create-toolpad-app/**/*',
-        'packages/toolpad/**/*',
-        'packages/toolpad-app/**/*',
-        'packages/toolpad-utils/**/*',
         'packages/toolpad-core/**/*',
-        'packages/toolpad-components/**/*',
+        'packages/toolpad-studio/**/*',
+        'packages/toolpad-studio-components/**/*',
+        'packages/toolpad-studio-runtime/**/*',
+        'packages/toolpad-utils/**/*',
       ],
-      excludedFiles: ['tsup.config.ts', '*.spec.ts', '*.spec.tsx', 'vitest.config.ts'],
+      excludedFiles: [
+        'tsup.config.ts',
+        '*.spec.ts',
+        '*.spec.tsx',
+        '*.test.ts',
+        '*.test.tsx',
+        'vitest.config.mts',
+      ],
       rules: {
         'import/no-extraneous-dependencies': ['error'],
       },
@@ -131,9 +158,9 @@ module.exports = {
          * Basically all code that is guaranteed being bundled for the client side and never used on serverside code
          * can be dev dependencies to reduce the size of the published package
          */
-        'packages/toolpad-app/src/components/**/*',
-        'packages/toolpad-app/src/toolpad/**/*',
-        'packages/toolpad-app/src/runtime/**/*',
+        'packages/toolpad-studio/src/components/**/*',
+        'packages/toolpad-studio/src/toolpad/**/*',
+        'packages/toolpad-studio/src/runtime/**/*',
       ],
       excludedFiles: ['*.spec.ts', '*.spec.tsx'],
       rules: {
@@ -144,30 +171,49 @@ module.exports = {
       // Starting small, we will progressively expand this to more packages.
       files: [
         // 'packages/create-toolpad-app/**/*',
-        // 'packages/toolpad/**/*',
-        // 'packages/toolpad-app/**/*',
-        'packages/toolpad-utils/**/*',
         // 'packages/toolpad-core/**/*',
-        // 'packages/toolpad-components/**/*',
+        // 'packages/toolpad-studio/**/*',
+        // 'packages/toolpad-studio/**/*',
+        'packages/toolpad-utils/**/*',
+        // 'packages/toolpad-studio-runtime/**/*',
+        // 'packages/toolpad-studio-components/**/*',
       ],
       rules: {
         '@typescript-eslint/no-explicit-any': ['error'],
       },
     },
     {
-      files: ['packages/toolpad-app/pages/**/*'],
+      files: ['packages/toolpad-studio/pages/**/*'],
       rules: {
         // The pattern is useful to type Next.js pages
         'react/function-component-definition': 'off',
       },
     },
+    // TODO remove, fix this rule in the codebase
     {
-      // Disabling this rule for now:
-      // https://github.com/mui/material-ui/blob/9737bc85bb6960adb742e7709e9c3710c4b6cedd/.eslintrc.js#L359
-      files: ['packages/*/src/**/*{.ts,.tsx,.js}'],
-      excludedFiles: ['*.d.ts', '*.spec.ts', '*.spec.tsx'],
+      files: ['**'],
       rules: {
-        'import/no-cycle': ['error', { ignoreExternal: true }],
+        'no-restricted-imports': ['error', noRestrictedImports],
+      },
+    },
+    {
+      files: ['packages/toolpad-studio/src/**/*'],
+      rules: { 'react-compiler/react-compiler': 'off' },
+    },
+    {
+      files: ['docs/**/*{.ts,.tsx,.js}'],
+      rules: {
+        'no-restricted-imports': [
+          'error',
+          {
+            paths: [
+              {
+                name: '@toolpad/core',
+                message: OneLevelImportMessage,
+              },
+            ],
+          },
+        ],
       },
     },
   ],

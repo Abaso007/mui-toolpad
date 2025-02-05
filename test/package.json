@@ -1,15 +1,18 @@
 {
-  "name": "@mui/toolpad-tests",
+  "name": "@toolpad/studio-tests",
   "private": true,
   "devDependencies": {
-    "@mui/material": "5.15.4",
-    "@mui/toolpad": "workspace:*",
-    "@mui/toolpad-utils": "workspace:*",
-    "express": "4.18.2",
-    "get-port": "7.0.0",
+    "@mui/material": "6.3.1",
+    "@toolpad/studio": "workspace:*",
+    "@toolpad/utils": "workspace:*",
+    "@types/invariant": "2.2.37",
+    "express": "4.21.2",
+    "get-port": "7.1.0",
     "invariant": "2.2.4",
-    "react": "18.2.0",
-    "react-dom": "18.2.0"
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "recharts": "^2.15.0"
   },
-  "type": "module"
+  "type": "module",
+  "version": "0.12.0"
 }
